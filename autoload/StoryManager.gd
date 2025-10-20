@@ -1,0 +1,27 @@
+﻿extends Node
+
+var _counters := {
+    "quests_completed": 0,
+    "nights_survived": 0,
+}
+
+func _ready() -> void:
+    pass
+
+func handle_event(id: String) -> void:
+    match id:
+        "quest_complete":
+            _counters["quests_completed"] += 1
+            GameManager.add_xp(3)
+            if _counters["quests_completed"] == 1:
+                GameManager.grant_random_traits(1, false, true)
+        "rest_without_food":
+            GameManager.grant_random_traits(1, true, false)
+        "night_survived":
+            _counters["nights_survived"] += 1
+            GameManager.add_xp(1)
+            if _counters["nights_survived"] % 3 == 0:
+                GameManager.grant_random_traits(1, false, true)
+        _:
+            GameManager.add_xp(1)
+

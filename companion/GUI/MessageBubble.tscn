@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[node name="MessageBubble" type="HBoxContainer"]
+anchors_preset = 10
+grow_horizontal = 2
+script = ExtResource("1")
+
+[node name="Label" type="Label" parent="."]
+text = "Message"

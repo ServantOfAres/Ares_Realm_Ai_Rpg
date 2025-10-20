@@ -1,0 +1,100 @@
+extends Control
+
+@onready var name_input: LineEdit = $Margin/Root/Grid/NameInput
+@onready var age_input: SpinBox = $Margin/Root/Grid/AgeInput
+@onready var gender_select: OptionButton = $Margin/Root/Grid/GenderSelect
+@onready var temper_input: TextEdit = $Margin/Root/Grid/TemperInput
+@onready var visual_input: TextEdit = $Margin/Root/Grid/VisualInput
+@onready var memory_input: LineEdit = $Margin/Root/Grid/MemoryInput
+@onready var backstory_input: TextEdit = $Margin/Root/Grid/BackstoryInput
+
+@onready var generate_btn: Button = $Margin/Root/Buttons/GenerateBtn
+@onready var confirm_btn: Button = $Margin/Root/Buttons/ConfirmBtn
+@onready var cancel_btn: Button = $Margin/Root/Buttons/CancelBtn
+
+# Temporary feedback label
+var generating: bool = false
+
+func _ready() -> void:
+	# Populate gender options if not already
+	if gender_select.item_count == 0:
+		gender_select.add_item("Female")
+		gender_select.add_item("Male")
+		gender_select.add_item("Non-binary")
+		gender_select.add_item("Other / Undefined")
+
+	generate_btn.pressed.connect(_on_generate_pressed)
+	confirm_btn.pressed.connect(_on_confirm_pressed)
+	cancel_btn.pressed.connect(_on_cancel_pressed)
+
+func _on_generate_pressed() -> void:
+	if generating:
+		return
+	generating = true
+	generate_btn.text = "Generating..."
+	await get_tree().create_timer(0.2).timeout  # small delay for UX
+
+	# Use CompanionManager's random generator to fill in base values
+	CompanionManager.randomize_personality()
+	var p = CompanionManager.personality
+
+	name_input.text = p.name
+	age_input.value = p.age
+	var idx := ["Female","Male","Non-binary","Other / Undefined"].find(p.gender)
+	if idx != -1:
+		gender_select.select(idx)
+	else:
+		gender_select.select(0)
+
+	# Provide random creative examples
+	temper_input.text = p.temperament + "\nDriven by curiosity and empathy."
+	visual_input.text = p.visual_description + ", usually wearing something distinctive."
+	memory_input.text = "starlight, first meeting, promise"
+	backstory_input.text = "They grew up near the ocean, fascinated by human stories and forgotten places."
+
+	# --- NEW: Auto-generate portrait prompt & placeholder image ---
+	var prompt_text: String = CompanionManager.build_portrait_prompt()
+	print("Generated portrait prompt:", prompt_text)
+
+	# If you already have an AI generation backend or API connected,
+	# you can replace this with an actual generator call.
+	# For now, we'll store the prompt and mark it as "pending".
+	var portrait_path := "user://companions/portraits/%s_prompt.txt" % CompanionManager.current_profile_name
+	DirAccess.make_dir_recursive_absolute("user://companions/portraits/")
+	var f := FileAccess.open(portrait_path, FileAccess.WRITE)
+	if f:
+		f.store_string(prompt_text)
+		f.close()
+
+	# Store prompt path in CompanionManager
+	CompanionManager.portrait_image_path = portrait_path
+	CompanionManager.save_profile()
+
+	generating = false
+	generate_btn.text = "AI Generate"
+
+func _on_confirm_pressed() -> void:
+	var name: String = name_input.text.strip_edges()
+	if name == "":
+		push_warning("Please enter a name.")
+		return
+
+	var p = CompanionManager.personality
+	p.name = name
+	p.age = int(age_input.value)
+	p.gender = gender_select.get_item_text(gender_select.selected)
+	p.temperament = temper_input.text.strip_edges()
+	p.visual_description = visual_input.text.strip_edges()
+
+	if CompanionManager.memory:
+		CompanionManager.memory.record_event("core_memory", memory_input.text.strip_edges())
+		CompanionManager.memory.record_event("origin_story", backstory_input.text.strip_edges())
+
+	CompanionManager.set_personality(p)
+	CompanionManager.save_profile()
+
+	print("Companion created:", CompanionManager.current_profile_name)
+	get_tree().change_scene_to_file("res://companion/GUI/CompanionMain.tscn")
+
+func _on_cancel_pressed() -> void:
+	get_tree().change_scene_to_file("res://companion/GUI/CompanionProfileSelect.tscn")

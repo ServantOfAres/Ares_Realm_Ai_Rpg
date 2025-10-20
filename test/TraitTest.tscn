@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=2]
+
+[node name="TraitTest" type="Control"]
+script = ExtResource( 1 )
+
+[node name="VBox" type="VBoxContainer" parent="."]
+
+[node name="Status" type="Label" parent="VBox"]
+margin_left = 6
+margin_top = 6
+margin_right = 6
+margin_bottom = 6
+
+[node name="Buttons" type="HBoxContainer" parent="VBox"]
+
+[node name="ToggleBtn" type="Button" parent="VBox/Buttons"]
+text = "Toggle Quick Learner"
+
+[node name="RandomBtn" type="Button" parent="VBox/Buttons"]
+text = "Grant Random Trait"
+
+[ext_resource path="res://test/TraitTest.gd" type="Script" id=1]

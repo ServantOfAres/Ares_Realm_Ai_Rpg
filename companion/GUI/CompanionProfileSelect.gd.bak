@@ -1,0 +1,64 @@
+extends Control
+
+@onready var profile_list: ItemList = $MarginContainer/VBoxContainer/ProfileList
+@onready var load_btn: Button = $MarginContainer/VBoxContainer/HBoxContainer/LoadBtn
+@onready var new_btn: Button = $MarginContainer/VBoxContainer/HBoxContainer/NewBtn
+@onready var delete_btn: Button = $MarginContainer/VBoxContainer/HBoxContainer/DeleteBtn
+
+func _ready() -> void:
+	_load_profile_list()
+
+	load_btn.pressed.connect(_on_load_pressed)
+	new_btn.pressed.connect(_on_new_pressed)
+	delete_btn.pressed.connect(_on_delete_pressed)
+
+	# Listen for updates from CompanionManager so UI refreshes automatically
+	if not CompanionManager.is_connected("profile_list_changed", Callable(self, "_on_profile_list_changed")):
+		CompanionManager.profile_list_changed.connect(Callable(self, "_on_profile_list_changed"))
+
+func _load_profile_list() -> void:
+	profile_list.clear()
+	var profiles: Array[String] = CompanionManager.get_profiles_list()
+
+	if profiles.is_empty():
+		profile_list.add_item("[No Profiles Found]")
+	else:
+		for name in profiles:
+			profile_list.add_item(name)
+
+func _on_load_pressed() -> void:
+	var selected := profile_list.get_selected_items()
+	if selected.is_empty():
+		push_warning("No profile selected.")
+		return
+
+	var name := profile_list.get_item_text(selected[0])
+	if name == "[No Profiles Found]":
+		return
+
+	# Load selected profile and go to CompanionMain
+	CompanionManager.load_profile(name)
+	print("Loaded companion: %s" % name)
+	get_tree().change_scene_to_file("res://companion/GUI/CompanionMain.tscn")
+
+func _on_new_pressed() -> void:
+	# Go to the Companion Creation scene for a new custom or AI companion
+	get_tree().change_scene_to_file("res://companion/GUI/CompanionCreation.tscn")
+
+func _on_delete_pressed() -> void:
+	var selected := profile_list.get_selected_items()
+	if selected.is_empty():
+		push_warning("No profile selected.")
+		return
+
+	var name := profile_list.get_item_text(selected[0])
+	if name == "[No Profiles Found]":
+		return
+
+	print("Deleting companion profile:", name)
+	CompanionManager.delete_profile_from_ui(name)
+	_load_profile_list()
+
+# Called whenever CompanionManager emits "profile_list_changed"
+func _on_profile_list_changed() -> void:
+	_load_profile_list()

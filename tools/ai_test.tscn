@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=2]
+
+[node name="AI Test" type="Node"]
+script = ExtResource( 1 )
+
+[ext_resource name="Script" path="res://tools/ai_test.gd" type="Script"]

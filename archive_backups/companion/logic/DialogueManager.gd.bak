@@ -1,0 +1,24 @@
+extends Node
+class_name DialogueManager
+
+func reply(user_text: String, personality: PersonalityCore, memory: MemorySystem) -> String:
+    var bond := int(memory.get_core_memory("emotional_bond") or 0)
+    var tone := personality.temperament
+    var name := personality.name
+
+    var opener := ""
+    if bond >= 60:
+        opener = "(warmly) "
+    elif bond >= 30:
+        opener = "(gently) "
+    else:
+        opener = ""
+
+    var flavored := user_text
+    if user_text.matchn("*music*"):
+        memory.remember_preference("likes_music", true)
+        flavored = "I remember you mentioned music—what are you into lately?"
+    elif user_text.matchn("*story*"):
+        flavored = "Want to hop into story mode or just chat about it?"
+
+    return "%s%s: %s" % [opener, name, flavored]

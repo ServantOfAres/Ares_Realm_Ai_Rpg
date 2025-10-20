@@ -1,0 +1,38 @@
+extends Node
+class_name MemorySystem
+
+var memory_log: Array = []
+var core_memories: Dictionary = {
+    "first_meeting": null,
+    "favorite_topic": null,
+    "emotional_bond": 0,
+    "player_preferences": {}
+}
+
+func record_event(event_type: String, details: String) -> void:
+    memory_log.append({
+        "time": Time.get_datetime_string_from_system(),
+        "type": event_type,
+        "details": details
+    })
+
+func remember_preference(key: String, value) -> void:
+    core_memories["player_preferences"][key] = value
+
+func set_core_memory(key: String, value) -> void:
+    core_memories[key] = value
+
+func get_core_memory(key: String):
+    return core_memories.get(key, null)
+
+func to_dict() -> Dictionary:
+    return {
+        "memory_log": memory_log,
+        "core_memories": core_memories
+    }
+
+static func from_dict(d: Dictionary) -> MemorySystem:
+    var m := MemorySystem.new()
+    m.memory_log = d.get("memory_log", [])
+    m.core_memories = d.get("core_memories", m.core_memories)
+    return m

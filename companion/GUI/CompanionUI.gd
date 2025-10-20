@@ -1,0 +1,76 @@
+﻿extends Control
+
+@onready var portrait: TextureRect = $MarginContainer/VBoxContainer/Top/HBox/Portrait
+@onready var persona_label: Label = $MarginContainer/VBoxContainer/Top/HBox/PersonaLabel
+@onready var message_list: VBoxContainer = $MarginContainer/VBoxContainer/Scroll/MessageList
+@onready var input: LineEdit = $MarginContainer/VBoxContainer/Bottom/Input
+@onready var send_btn: Button = $MarginContainer/VBoxContainer/Bottom/SendBtn
+
+var bubble_scene: PackedScene = preload("res://companion/GUI/MessageBubble.tscn")
+
+func _ready() -> void:
+    send_btn.pressed.connect(_on_send)
+    input.text_submitted.connect(_on_submit)
+    CompanionManager.message_sent.connect(_on_user_msg)
+    CompanionManager.companion_reply.connect(_on_ai_msg)
+    CompanionManager.portrait_updated.connect(_on_portrait)
+    _refresh_persona()
+    _load_portrait(CompanionManager.portrait_image_path)
+
+func _refresh_persona() -> void:
+    var p = CompanionManager.personality
+    if p == null:
+        persona_label.text = "(no companion)"
+        return
+    persona_label.text = "%s (%d) — %s" % [p.name, p.age, p.temperament]
+
+func _on_send() -> void:
+    _send_text(input.text)
+
+func _on_submit(t: String) -> void:
+    _send_text(t)
+
+func _send_text(t: String) -> void:
+    if t.strip_edges() == "":
+        return
+    CompanionManager.send_message(t)
+    input.clear()
+
+func _on_user_msg(msg: String) -> void:
+    _add_bubble(msg, "user")
+
+func _on_ai_msg(msg: String) -> void:
+    _add_bubble(msg, "ai")
+
+func _add_bubble(text: String, role: String) -> void:
+    var b = bubble_scene.instantiate()
+    b.role = role
+    b.set_text(text)
+    message_list.add_child(b)
+    await get_tree().process_frame
+    var sc: ScrollContainer = $MarginContainer/VBoxContainer/Scroll
+    sc.scroll_vertical = sc.get_v_scroll_bar().max_value
+
+func _on_portrait(path: String) -> void:
+    _load_portrait(path)
+
+func _load_portrait(path: String) -> void:
+    if path == null or path == "":
+        return
+    # Support both resource paths (res://) and saved user files (user://). Use FileAccess for user://.
+    if path.begins_with("user://"):
+        if not FileAccess.file_exists(path):
+            return
+        var img := Image.new()
+        var err := img.load(path)
+        if err != OK:
+            return
+        var tex := ImageTexture.create_from_image(img)
+        portrait.texture = tex
+        return
+
+    if ResourceLoader.exists(path):
+        var tx: Texture2D = load(path)
+        if tx:
+            portrait.texture = tx
+

@@ -1,0 +1,87 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://companion/GUI/CompanionCreation.gd" id="1"]
+
+[node name="CompanionCreation" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="Margin" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+
+[node name="Root" type="VBoxContainer" parent="Margin"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/separation = 12
+
+[node name="Title" type="Label" parent="Margin/Root"]
+text = "Create Your Companion"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 26
+
+[node name="Grid" type="GridContainer" parent="Margin/Root"]
+columns = 2
+custom_constants/hseparation = 12
+custom_constants/vseparation = 8
+
+[node name="NameLabel" type="Label" parent="Margin/Root/Grid"]
+text = "Name:"
+[node name="NameInput" type="LineEdit" parent="Margin/Root/Grid"]
+
+[node name="AgeLabel" type="Label" parent="Margin/Root/Grid"]
+text = "Age:"
+[node name="AgeInput" type="SpinBox" parent="Margin/Root/Grid"]
+min_value = 18
+max_value = 100
+value = 25
+
+[node name="GenderLabel" type="Label" parent="Margin/Root/Grid"]
+text = "Gender:"
+[node name="GenderSelect" type="OptionButton" parent="Margin/Root/Grid"]
+
+[node name="TemperLabel" type="Label" parent="Margin/Root/Grid"]
+text = "Personality Type:"
+[node name="TemperInput" type="TextEdit" parent="Margin/Root/Grid"]
+custom_minimum_size = Vector2(0, 60)
+wrap_mode = 1
+placeholder_text = "Describe temperament (e.g. Playful, Curious, Stoic, Adventurous...)"
+
+[node name="VisualLabel" type="Label" parent="Margin/Root/Grid"]
+text = "Physical Description:"
+[node name="VisualInput" type="TextEdit" parent="Margin/Root/Grid"]
+custom_minimum_size = Vector2(0, 100)
+wrap_mode = 1
+placeholder_text = "Describe their looks, style, expressions, or aura..."
+
+[node name="MemoryLabel" type="Label" parent="Margin/Root/Grid"]
+text = "Core Memory Words:"
+[node name="MemoryInput" type="LineEdit" parent="Margin/Root/Grid"]
+placeholder_text = "e.g. ocean, loss, discovery, friendship"
+
+[node name="BackstoryLabel" type="Label" parent="Margin/Root/Grid"]
+text = "Backstory / Location:"
+[node name="BackstoryInput" type="TextEdit" parent="Margin/Root/Grid"]
+custom_minimum_size = Vector2(0, 100)
+wrap_mode = 1
+placeholder_text = "Where are they from? What shaped who they are?"
+
+[node name="Buttons" type="HBoxContainer" parent="Margin/Root"]
+alignment = 1
+custom_constants/separation = 12
+
+[node name="GenerateBtn" type="Button" parent="Margin/Root/Buttons"]
+text = "AI Generate"
+
+[node name="ConfirmBtn" type="Button" parent="Margin/Root/Buttons"]
+text = "Confirm"
+
+[node name="CancelBtn" type="Button" parent="Margin/Root/Buttons"]
+tex
